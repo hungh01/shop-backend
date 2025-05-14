@@ -7,7 +7,7 @@ import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/', authMiddleware, authController.getUsers);
+router.get('/me', authMiddleware, authController.getUser);
 router.post('/signup', validateRequest(SignUpRequest), authController.signUp);
 router.post('/login', validateRequest(LoginRequest), authController.logIn);
 router.post('/logout', authController.logOut);

@@ -7,9 +7,26 @@ import { CreateProductRequest } from "./dto/create-product.request";
 
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { productName, productCategoryName, stock, page, pageLimit } = req.query;
+    console.log('Query:', stock);
     try {
-        const products = await productService.getProducts();
-        res.json(products);
+        const products = await productService.getProducts(
+            (productName as string) || '',
+            (productCategoryName as string) || '',
+            (stock as string) || '-1',
+
+        );
+        const startIndex = ((parseInt(page as string, 10) || 1) - 1) * (parseInt(pageLimit as string, 10) || 10);
+        const endIndex = startIndex + (parseInt(pageLimit as string, 10) || 10);
+        const paginatedProducts = products.slice(startIndex, endIndex);
+
+        res.json({
+            page: parseInt(page as string, 10) || 1,
+            pageLimit: parseInt(pageLimit as string, 10) || 10,
+            totalPages: Math.ceil(products.length / (parseInt(pageLimit as string, 10) || 10)),
+            totalProducts: products.length,
+            paginatedProducts,
+        });
     } catch (error) {
         next(error);
     }
@@ -43,9 +60,6 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         res.status(400).json({ message: 'Image file is required' });
         return;
     }
-    console.log('File:', req.file);
-    console.log('Body:', req.body);
-
 
     try {
         const product = await productService.createProduct(req.body, req.file.filename);
@@ -56,9 +70,17 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 };
 
 export const updateProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    console.log('Update product request body:', req.body);
+    const dto = plainToInstance(CreateProductRequest, req.body);
+    const errors = await validate(dto);
+    if (errors.length > 0) {
+        res.status(400).json({ message: 'Invalid input', errors });
+        return;
+    }
+
     try {
         const productId = req.params.id;
-        const updatedProduct = await productService.updateProduct(productId, req.body, req.file?.filename || 'undefined');
+        const updatedProduct = await productService.updateProduct(productId, req.body, req.file?.filename || '');
         if (!updatedProduct) {
             res.status(404).json({ message: "Product not found" });
             return;
@@ -94,3 +116,22 @@ export const getProductsByName = async (req: Request, res: Response, next: NextF
     }
 };
 
+export const getProductsByIds = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const ids = req.params.ids.split(',').map(id => parseInt(id));
+        console.log('IDs:', ids);
+        const products = await productService.getProductsByIds(ids);
+        res.json(products);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getProductDashboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const products = await productService.getProductDashboard();
+        res.json(products);
+    } catch (error) {
+        next(error);
+    }
+};

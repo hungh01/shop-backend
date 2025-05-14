@@ -2,13 +2,34 @@ import { PrismaClient } from "@prisma/client";
 import { ProductsResponse } from "./dto/products.respone";
 import { CreateProductRequest } from "./dto/create-product.request";
 import { CreateProductCategoryRequest } from "../categories/dto/create-product-category.request";
+import { UpdateProductRequest } from "./dto/update-product.request";
 
 
 
 const prisma = new PrismaClient();
 
-export const getProducts = async () => {
-    return await prisma.product.findMany();
+export const getProducts = async (productName: string, productCategoryName: string, stock: string) => {
+    return await prisma.product.findMany({
+        where: {
+            name: {
+                contains: productName,
+                mode: 'insensitive'
+            },
+            category: {
+                name: {
+                    contains: productCategoryName,
+                    mode: 'insensitive'
+                }
+            },
+            stock: stock === '-1' ? undefined : parseInt(stock) // lấy đúng bằng stock
+        },
+        include: {
+            category: true
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
 
 }
 export const getProductById = async (id: string) => {
@@ -30,7 +51,7 @@ export const createProduct = async (productData: CreateProductRequest, filename:
     });
 }
 
-export const updateProduct = async (id: string, productData: CreateProductRequest, filename: string) => {
+export const updateProduct = async (id: string, productData: UpdateProductRequest, filename: string) => {
     return await prisma.product.update({
         where: { id: Number(id) },
         data: {
@@ -38,7 +59,7 @@ export const updateProduct = async (id: string, productData: CreateProductReques
             stock: parseInt(productData.stock),
             price: parseFloat(productData.price),
             categoryId: parseInt(productData.categoryId),
-            image: `/uploads/${filename}`
+            image: filename ? `/uploads/${filename}` : productData.image
         }
     });
 }
@@ -65,3 +86,28 @@ export const getProductsByName = async (name: string) => {
     });
 }
 
+export const getProductsByIds = async (ids: number[]) => {
+    return await prisma.product.findMany({
+        where: {
+            id: {
+                in: ids
+            }
+        }
+    });
+}
+
+export const getProductDashboard = async () => {
+    const products = await prisma.product.findMany({
+        include: {
+            category: true
+        }
+    });
+
+
+    const totalStockCount = products.reduce((acc, product) => acc + (product.stock ?? 0), 0);
+    const totalInventoryValue = products.reduce((acc, product) => acc + (product.price ?? 0) * (product.stock ?? 0), 0);
+    return {
+        totalStockCount,
+        totalInventoryValue,
+    };
+};

@@ -22,8 +22,10 @@ export const getProductCategories = async (req: Request, res: Response, next: Ne
 
 export const getCategoriesById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const categoryId = req.params.id;
-        const categories = await categoriesService.getCategoriesById(categoryId);
+        const categoryId = req.params.categoryId;
+        const page = req.query.page ? +req.query.page : 1;
+        const limitPage = req.query.limitPage ? +req.query.limitPage : 8;
+        const categories = await categoriesService.getCategoriesById(+categoryId, page, limitPage);
         if (!categories) {
             res.status(404).json({ message: "Product not found" });
             return;
