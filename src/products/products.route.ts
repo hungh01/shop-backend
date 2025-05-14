@@ -11,11 +11,13 @@ const router = Router();
 
 
 router.get("/", productController.getProducts);
-router.get("/:id", productController.getProductById);
-router.post("/", authMiddleware, upload.single('image'), productController.createProduct);
-router.put("/:id", authMiddleware, productController.updateProduct);
-router.delete("/:id", authMiddleware, productController.deleteProduct);
 router.get("/search", productController.getProductsByName);
+router.get("/dashboard", authMiddleware, productController.getProductDashboard);
+router.get("/:id", productController.getProductById);
+router.get("/cart/:ids", productController.getProductsByIds);
+router.post("/", authMiddleware, upload.single('image'), productController.createProduct);
+router.post("/:id", authMiddleware, upload.single('image'), productController.updateProduct);
+router.delete("/:id", authMiddleware, productController.deleteProduct);
 
 
 export default router;

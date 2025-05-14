@@ -6,6 +6,12 @@ export class SignUpRequest {
     @IsString()
     phone!: string;
     @IsString()
+    city!: string;
+    @IsString()
+    district!: string;
+    @IsString()
+    ward!: string;
+    @IsString()
     address!: string;
     @IsString()
     @IsEmail()

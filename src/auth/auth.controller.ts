@@ -10,9 +10,9 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
 
-export const getUsers = async (req: Request, res: Response): Promise<void> => {
-    console.log(req.user);
-    const users = await authService.getAllUsers();
+export const getUser = async (req: Request, res: Response): Promise<void> => {
+
+    const users = await authService.getUser(req.user?.userId);
     res.json(users);
 };
 

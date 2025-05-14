@@ -11,8 +11,27 @@ import { stat } from 'fs';
 const prisma = new PrismaClient();
 
 
-export const getAllUsers = async () => {
-    return prisma.user.findMany();
+export const getUser = async (userId: string | undefined) => {
+    if (!userId) {
+        return
+    }
+    return prisma.user.findUnique(
+        {
+            where: { id: parseInt(userId) },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                city: true,
+                district: true,
+                ward: true,
+                address: true,
+                createdAt: true,
+                updatedAt: true
+            }
+        }
+    );
 };
 
 
