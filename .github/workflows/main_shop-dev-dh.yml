@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
     permissions:
       contents: read #This is required for actions/checkout
@@ -56,7 +57,10 @@ jobs:
           name: node-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip
+        run: |
+          unzip release.zip
+          npm install
+          npx prisma generate
       
       - name: Login to Azure
         uses: azure/login@v2
