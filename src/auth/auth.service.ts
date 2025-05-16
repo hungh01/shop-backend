@@ -1,14 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+
 
 import { SignUpRequest } from './dto/signup.request';
 import * as bcryptjs from 'bcryptjs';
-import createHttpError from 'http-errors';
 import { LoginRequest } from './dto/login.request';
 import { signJwt } from '../utils/jwt';
-import { stat } from 'fs';
 
 
-const prisma = new PrismaClient();
+import prisma from '../prisma/client';
 
 
 export const getUser = async (userId: string | undefined) => {
