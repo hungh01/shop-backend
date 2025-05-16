@@ -1,3 +1,6 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy Node.js app to Azure Web App - shop-dev-dh
 
 on:
@@ -13,7 +16,8 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -23,17 +27,25 @@ jobs:
       - name: Install dependencies and build
         run: |
           npm ci
+          npx prisma generate
           npm run build --if-present
           npm run test --if-present
 
-      - name: Upload artifact (source code) for deployment
+      - name: Prepare artifact for deployment
+        run: |
+          mkdir deploy-folder
+          cp -R * deploy-folder/
+          cp -R .next deploy-folder/.next || true
+          cp -R prisma deploy-folder/prisma || true
+          cp -R node_modules/.prisma deploy-folder/node_modules/.prisma || true
+          cp -R node_modules/@prisma deploy-folder/node_modules/@prisma || true
+          zip -r release.zip deploy-folder
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-code
-          path: |
-            ./
-            !node_modules
-            !release.zip
+          name: node-app
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -46,10 +58,13 @@ jobs:
       contents: read
 
     steps:
-      - name: Download app artifact
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: app-code
+          name: node-app
+
+      - name: Unzip artifact
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -64,5 +79,4 @@ jobs:
         with:
           app-name: 'shop-dev-dh'
           slot-name: 'Production'
-          package: .
-
+          package: deploy-folder
