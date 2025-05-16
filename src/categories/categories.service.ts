@@ -1,7 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+
 import { CreateProductCategoryRequest } from "./dto/create-product-category.request";
 
-const prisma = new PrismaClient();
+import prisma from '../prisma/client';
+
 
 
 export const addProductCategory = async (data: CreateProductCategoryRequest) => {

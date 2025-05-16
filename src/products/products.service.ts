@@ -1,12 +1,11 @@
-import { PrismaClient } from "@prisma/client";
-import { ProductsResponse } from "./dto/products.respone";
+
 import { CreateProductRequest } from "./dto/create-product.request";
-import { CreateProductCategoryRequest } from "../categories/dto/create-product-category.request";
 import { UpdateProductRequest } from "./dto/update-product.request";
 
 
 
-const prisma = new PrismaClient();
+import prisma from '../prisma/client';
+
 
 export const getProducts = async (productName: string, productCategoryName: string, stock: string) => {
     return await prisma.product.findMany({
