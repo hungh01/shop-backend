@@ -60,15 +60,13 @@ export const logIn = async (req: Request<{}, {}, LoginRequest>, res: Response, n
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-            path: '/'
+            secure: true,
+            sameSite: 'none',
         });
         res.cookie('Authentication', accessToken, {
             httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-            path: '/'
+            secure: true,
+            sameSite: 'none',
         });
 
         res.status(200).json({
